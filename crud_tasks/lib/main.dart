@@ -57,8 +57,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 final task = taskProvider.tasks[index];
                 return ListTile(
                   title: Text(
-                    task.title,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    task.titulo,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   // subtitle: Text('${task.status} - ${task.priority}'),
                   subtitle: Column(
@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           const Icon(Icons.person),
                           const SizedBox(width: 5),
-                          Text('Responsible: ${task.responsible}'),
+                          Text('Responsible: ${task.responsavelId}'),
                         ],
                       ),
                       Row(
@@ -76,14 +76,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           const Icon(Icons.calendar_today),
                           const SizedBox(width: 5),
                           Text(
-                              'Deadline: ${DateFormat('yyyy-MM-dd').format(task.deadline)}'),
+                              'Deadline: ${DateFormat('yyyy-MM-dd').format(task.dataLimite)}'),
                         ],
                       ),
                       Row(
                         children: [
                           const Icon(Icons.work),
                           const SizedBox(width: 5),
-                          Text('${task.status} - ${task.priority}'),
+                          Text('${task.status} '),
                         ],
                       ),
                     ],
@@ -93,11 +93,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: () => navigateToEditTask(task.id),
+                        onPressed: () => navigateToEditTask(task.idTarefa),
                       ),
                       IconButton(
                         icon: const Icon(Icons.delete),
-                        onPressed: () => taskProvider.deleteTask(task.id),
+                        onPressed: () => taskProvider.deleteTask(task.idTarefa),
                       ),
                     ],
                   ),

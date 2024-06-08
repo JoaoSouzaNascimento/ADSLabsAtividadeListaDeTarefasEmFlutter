@@ -5,51 +5,53 @@ import 'package:flutter/material.dart';
 import 'package:crud_tasks/consts.dart';
 
 class Task {
-  int id;
-  final String title;
-  final String description;
-  final String responsible;
+  int idTarefa;
+  final String titulo;
+  final String? descricao;
+  final DateTime dataLimite;
+  final DateTime? dataConclusao;
   final String status;
-  final String priority;
-  final DateTime deadline;
+  int? responsavelId;
 
   Task({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.responsible,
+    required this.idTarefa,
+    required this.titulo,
+    required this.descricao,
+    required this.dataLimite,
+    required this.dataConclusao,
     required this.status,
-    required this.priority,
-    required this.deadline,
+    required this.responsavelId,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) => Task(
-        id: json['id'],
-        title: json['titulo'],
-        description: json['descricao'],
-        responsible: json['responsavel'],
-        status: json['status'],
-        priority: json['prioridade'],
-        deadline: DateTime.parse(json['data_limite']),
-      );
+    idTarefa: json['id_tarefa'],
+    titulo: json['titulo'],
+    descricao: json['descricao'],
+    dataLimite: DateTime.parse(json['data_limite']),
+    dataConclusao: DateTime.parse(json['data_conclusao']),
+    status: json['status'],
+    responsavelId: json['responsavelId'],
+  );
+
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'titulo': title,
-        'descricao': description,
-        'responsavel': responsible,
-        'status': status,
-        'prioridade': priority,
-        'data_limite': deadline.toIso8601String(),
-      };
+    'id_tarefa': idTarefa,
+    'titulo': titulo,
+    'descricao': descricao,
+    'status': status,
+    'data_limite': dataLimite.toIso8601String(),
+    'data_conclusao': dataConclusao!.toIso8601String(),
+    'responsavelId': responsavelId,
+  };
+
   Map<String, dynamic> toJsonForAdd() => {
-        'titulo': title,
-        'descricao': description,
-        'responsavel': responsible,
-        'status': status,
-        'prioridade': priority,
-        'data_limite': deadline.toIso8601String(),
-      };
+    'titulo': titulo,
+    'descricao': descricao,
+    'status': status,
+    'data_limite': dataLimite.toIso8601String(),
+    'data_conclusao': dataConclusao!.toIso8601String(),
+    'responsavelId': responsavelId
+  };
 }
 
 class TaskProvider extends ChangeNotifier {
@@ -60,7 +62,7 @@ class TaskProvider extends ChangeNotifier {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      final List<dynamic> taskData = data['tarefas'];
+      final List<dynamic> taskData = data['dados'];
       tasks = taskData.map((item) => Task.fromJson(item)).toList();
       notifyListeners();
     } else {
@@ -91,7 +93,7 @@ class TaskProvider extends ChangeNotifier {
     if (response.statusCode != 200) {
       throw Exception('Failed to delete task');
     } else {
-      tasks.removeWhere((task) => task.id == taskId);
+      tasks.removeWhere((task) => task.idTarefa == taskId);
       notifyListeners();
     }
   }
@@ -106,7 +108,7 @@ class TaskProvider extends ChangeNotifier {
     if (response.statusCode != 200) {
       throw Exception('Failed to edit task');
     } else {
-      final index = tasks.indexWhere((task) => task.id == taskId);
+      final index = tasks.indexWhere((task) => task.idTarefa == taskId);
       tasks[index] = updatedTask;
       notifyListeners();
     }

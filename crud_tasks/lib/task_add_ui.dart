@@ -66,20 +66,20 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         },
                       );
                     },
-                    child: Text(deadline?.toString() ?? 'Select Deadline'),
+                    child: Text(deadline.toString()),
                   ),
                 ],
               ),
               ElevatedButton(
                 onPressed: () {
                   final task = Task(
-                    id: 0,
-                    title: _titleController.text,
-                    description: _descriptionController.text,
-                    responsible: _responsibleController.text,
+                    idTarefa: 0,
+                    titulo: _titleController.text,
+                    descricao: _descriptionController.text,
+                    responsavelId: _responsibleController.hashCode,
                     status: _statusController.text,
-                    priority: _priorityController.text,
-                    deadline: deadline,
+                    dataLimite: deadline,
+                    dataConclusao: deadline,
                   );
                   taskProvider.addTask(task).then((_) {
                     Navigator.pop(context);
