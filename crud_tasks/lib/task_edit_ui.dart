@@ -5,21 +5,38 @@ import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class AddTaskPage extends StatefulWidget {
-  const AddTaskPage({super.key});
+class EditTaskPage extends StatefulWidget {
+  final int taskId;
+  const EditTaskPage({super.key, required this.taskId});
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<EditTaskPage> createState() => _EditTaskPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _responsibleController = TextEditingController();
+class _EditTaskPageState extends State<EditTaskPage> {
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  late TextEditingController _responsibleController;
   final _formKey = GlobalKey<FormState>();
   int? _selectedResponsibleId;
-  DateTime _deadlineController = DateTime.now();
+  late DateTime _deadlineController;
+  late Task task;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final responsibleProvider = Provider.of<ResponsibleProvider>(context, listen: false);
+    task = taskProvider.tasks.firstWhere((task) => task.idTarefa == widget.taskId);
+    Responsible responsible = responsibleProvider.responsibles.firstWhere(
+            (responsible) => responsible.responsavelId == task.responsavelId);
+    _titleController = TextEditingController(text: task.titulo);
+    _descriptionController = TextEditingController(text: task.descricao);
+    _deadlineController = task.dataLimite;
+    _responsibleController = TextEditingController(text: responsible.nome);
+    _selectedResponsibleId = responsible.responsavelId;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +45,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adicionar Tarefa'),
+        title: const Text('Editar Tarefa'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -108,10 +125,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text(
-                      'Prazo: ',
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    const Text('Prazo: '),
                     TextButton(
                       onPressed: () {
                         DatePicker.showDatePicker(
@@ -125,10 +139,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                           },
                         );
                       },
-                      child: Text(
-                        DateFormat('yyyy-MM-dd').format(_deadlineController),
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      child: Text(DateFormat('yyyy-MM-dd').format(_deadlineController)),
                     ),
                   ],
                 ),
@@ -142,16 +153,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         setState(() {
                           _isLoading = true;
                         });
-                        final task = Task(
-                          idTarefa: 0,
+                        final taskUpdated = Task(
+                          idTarefa: task.idTarefa,
                           titulo: _titleController.text,
                           descricao: _descriptionController.text,
                           responsavelId: _selectedResponsibleId!,
-                          status: 'Atribuido',
+                          status: task.status,
                           dataLimite: _deadlineController,
                           dataConclusao: null,
                         );
-                        taskProvider.addTask(task).then((_) {
+                        taskProvider.editTask(task.idTarefa, taskUpdated).then((_) {
                           Navigator.pop(context);
                           taskProvider.fetchTasks();
                         }).catchError((error) {
@@ -163,7 +174,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         });
                       }
                     },
-                    child: const Text('Adicionar Tarefa'),
+                    child: const Text('Editar Tarefa'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(

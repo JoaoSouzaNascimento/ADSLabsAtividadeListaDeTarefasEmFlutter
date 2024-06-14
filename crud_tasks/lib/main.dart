@@ -1,8 +1,11 @@
+import 'package:crud_tasks/responsible_api.dart';
+import 'package:crud_tasks/responsibles_page.dart';
 import 'package:crud_tasks/task_add_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:crud_tasks/tasks_api.dart';
 import 'package:intl/intl.dart';
+import 'package:crud_tasks/tasks_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,6 +13,59 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => ResponsibleProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData.light(),
+        home: const HomePage(),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: const TabBar(
+            tabs: [
+              Tab(
+                icon: Icon(Icons.person),
+                text: 'Responsável',
+              ),
+              Tab(
+                icon: Icon(Icons.work),
+                text: 'Tarefas',
+              ),
+            ],
+          ),
+          title: const Text('Gerenciador de Tarefas'),
+        ),
+        body: const TabBarView(
+          children: [
+            ResponsiblesPage(),
+            TasksPage(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Myapp extends StatelessWidget {
+  const Myapp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -9,16 +9,16 @@ class Task {
   final String titulo;
   final String? descricao;
   final DateTime dataLimite;
-  final DateTime? dataConclusao;
+  late final DateTime? dataConclusao;
   final String status;
-  int? responsavelId;
+  int responsavelId;
 
   Task({
     required this.idTarefa,
     required this.titulo,
-    required this.descricao,
+    this.descricao,
     required this.dataLimite,
-    required this.dataConclusao,
+    this.dataConclusao,
     required this.status,
     required this.responsavelId,
   });
@@ -28,7 +28,9 @@ class Task {
     titulo: json['titulo'],
     descricao: json['descricao'],
     dataLimite: DateTime.parse(json['data_limite']),
-    dataConclusao: DateTime.parse(json['data_conclusao']),
+    dataConclusao: (json['data_conclusao'] == null)
+        ? null
+        : DateTime.parse(json['data_conclusao']),
     status: json['status'],
     responsavelId: json['responsavelId'],
   );
@@ -38,18 +40,17 @@ class Task {
     'id_tarefa': idTarefa,
     'titulo': titulo,
     'descricao': descricao,
-    'status': status,
-    'data_limite': dataLimite.toIso8601String(),
-    'data_conclusao': dataConclusao!.toIso8601String(),
+    'data_limite': dataLimite.toIso8601String().split('T')[0],
+    'data_conclusao': (dataConclusao == null)
+        ? null
+        : dataConclusao!.toIso8601String().split('T')[0],
     'responsavelId': responsavelId,
   };
 
   Map<String, dynamic> toJsonForAdd() => {
     'titulo': titulo,
     'descricao': descricao,
-    'status': status,
-    'data_limite': dataLimite.toIso8601String(),
-    'data_conclusao': dataConclusao!.toIso8601String(),
+    'data_limite': dataLimite.toIso8601String().split('T')[0],
     'responsavelId': responsavelId
   };
 }
@@ -77,10 +78,9 @@ class TaskProvider extends ChangeNotifier {
       headers: {"Content-Type": "application/json"},
       body: json.encode(task.toJsonForAdd()),
     );
-    if (response.statusCode != 200) {
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-      throw Exception('Failed to add task');
+    if (response.statusCode != 201) {
+      final data = json.decode(response.body);
+      throw data['message'];
     } else {
       tasks.add(task);
       notifyListeners();
@@ -106,7 +106,8 @@ class TaskProvider extends ChangeNotifier {
       body: json.encode(updatedTask.toJson()),
     );
     if (response.statusCode != 200) {
-      throw Exception('Failed to edit task');
+      final data = json.decode(response.body);
+      throw data['message'];
     } else {
       final index = tasks.indexWhere((task) => task.idTarefa == taskId);
       tasks[index] = updatedTask;
